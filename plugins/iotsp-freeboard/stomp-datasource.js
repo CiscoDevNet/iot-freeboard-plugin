@@ -9,7 +9,7 @@
 
 		type_name : "Cisco-freeboard-plugin",
 
-		display_name : "Cisco AMPQP Data Broker",
+		display_name : "Cisco AMQP Data Broker",
 
 		description : "A plugin to connect to the Cisco IoT Platform",
 
