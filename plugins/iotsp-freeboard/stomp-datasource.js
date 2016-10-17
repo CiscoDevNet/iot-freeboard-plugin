@@ -22,15 +22,49 @@
 				name : 'server',
 				displayName : 'Server',
 				type : 'text',
-				default_value: "52.201.225.106",
+				default_value: "localhost:15674",
 				description :"The server where your AMQP broker is running."
 			},
 			{
 				name : 'exchange',
 				displayName : 'Exchange Name',
 				type : 'text',
-				default_value: "4-EXC",
+				default_value: "test-headers",
 				description : 'The exchange you are subscribing to'
+			},
+			{
+				name        : "match",
+				display_name: "Exchange Matches",
+				type        : "option",
+				options			: [
+					{
+						name: "Match All",
+						value: "all"
+					},
+					{
+						name: "Match Any",
+						value: "any"
+					}
+				],
+				description : 'Match.'
+			},
+			{
+				name : 'headers',
+				displayName : 'Headers',
+				type : 'array',
+				settings    : [
+					{
+						name        : "key",
+						display_name: "Key",
+						type        : "text"
+					},
+					{
+						name        : "value",
+						display_name: "Value",
+						type        : "text"
+					}
+				],
+				description : 'The headers exchange filter.'
 			},
 			{
 				name : 'routingKey',
@@ -43,21 +77,21 @@
 				name : 'virtualHost',
 				displayName : 'Virtual Host',
 				type : 'text',
-				default_value: "IOTSP_INTERNAL",
+				default_value: "/",
 				description : 'The virtual host for the AMQP broker.'
 			},
 			{
 				name : 'username',
 				display_name : 'Username',
 				type : 'text',
-				default_value: "dougn@cisco.com",
+				default_value: "guest",
 				description : 'Cisco IoT username.'
 			},
 			{
 				name : 'password',
 				display_name : 'password',
 				type : 'text',
-				default_value: "Iotsp$1234",
+				default_value: "guest",
 				description : 'Cisco IoT password'
 			}],
 
@@ -90,30 +124,109 @@
 		 */
 		var onDataReceived = function(stompFrame){
 
-			var objdata, data;
+			var objdata, data, headers, headersData;
 
 			console.info('stompFrame=' + JSON.stringify(stompFrame));
 
 			if (stompFrame.body) {
+
 				console.info("got message with body " + stompFrame.body);
+
+				headers = stompFrame.headers;
 				data = stompFrame.body;
 
-				try {
-					objdata = JSON.parse(data);
-				} catch (e) {
-					console.debug('Invalid JSON Received');
+				var headersMap = {};
+				for (var p in headers) {
+					if( headers.hasOwnProperty(p) ) {
+						if(p != "content-length" && p != "redelivered" && p != "subscription" && p !="message-id" && p != "destination" && p != "persistent"){
+							headersMap[p] = headers[p];
+						}
+					}
 				}
 
-				if (typeof objdata == "object") {
-					updateCallback(objdata);
-				} else {
-					updateCallback(data);
+				var userFilters = currentSettings.headers;
+				var match = 0;
+				for(var i=0; i < userFilters.length; i++){
+					for (var p in headersMap){
+						if(userFilters[i].key == p && userFilters[i].value == headersMap[p]){
+							match++;
+						}
+					}
 				}
+
+				if(currentSettings.match == "all"){
+					if(userFilters.length == match){
+						try {
+							objdata = JSON.parse(data);
+						} catch (e) {
+							console.debug('Invalid JSON Received');
+						}
+
+						if (typeof objdata == "object") {
+							updateCallback(objdata);
+						} else {
+							updateCallback(data);
+						}
+					}
+				}
+				else if(currentSettings.match == "any"){
+					if(match > 0){
+						try {
+							objdata = JSON.parse(data);
+						} catch (e) {
+							console.debug('Invalid JSON Received');
+						}
+
+						if (typeof objdata == "object") {
+							updateCallback(objdata);
+						} else {
+							updateCallback(data);
+						}
+					}
+				}
+
+				//console.log('match total =' + match);
+
+
+				//console.log('headers from user = ' + JSON.stringify(currentSettings.headers[0]));
+
+//				try{
+//					headersData =  JSON.parse(headersData);
+//
+//					console.log("deviceId = " + headersData.deviceID);
+//				}
+//				catch(e){
+//					console.debug('Invalid JSON Received');
+//				}
+
+
+
 
 			} else {
 				console.info('An Empty Message Received');
 			}
 
+		};
+
+		function parse_headers(headers_str) {
+			var these_headers = {},
+				one_header = [],
+				header_key = null,
+				header_val = null,
+				headers_split = headers_str.split('\n');
+
+			for (var i = 0; i < headers_split.length; i++) {
+				one_header = headers_split[i].split(':');
+				if (one_header.length > 1) {
+					header_key = one_header.shift();
+					header_val = one_header.join(':');
+					these_headers[header_key] = header_val;
+				}
+				else {
+					these_headers[one_header[0]] = one_header[1];
+				}
+			}
+			return these_headers;
 		};
 
 		/**
@@ -122,11 +235,12 @@
 		var onConnect = function() {
 			console.info("Stomp connection(%s) Opened", currentSettings.url);
 
+			var headers = {'selector': "deviceId = 000"};
+
 			if(currentSettings.exchange != ""){
 				//subscribe through an exchange
-				stompClient.subscribe("/exchange/" + currentSettings.exchange + "/" + currentSettings.routingKey, onDataReceived);
+				stompClient.subscribe("/exchange/" + currentSettings.exchange + "/" + currentSettings.routingKey , onDataReceived, headers);
 			}
-
 		};
 
 		/**
@@ -142,6 +256,7 @@
 		 */
 		function createConnection() {
 
+			//Removes all the protocol instances from the server
 			var sanitizedServer = currentSettings.server.replace(/.*?:\/\//g, "");  //remove all the protocols instances in a string
 
 			var parser = document.createElement('a');
@@ -160,7 +275,16 @@
 			//For Chrome, make sure protocol param is set as an empty array
 			stompClient = Stomp.client(url, []);
 
-			stompClient.connect(currentSettings.username, currentSettings.password, onConnect, onError, currentSettings.virtualHost);
+			var headers = {
+				"login": currentSettings.username,
+				"passcode": currentSettings.password,
+				// additional header
+				"host": currentSettings.virtualHost
+			};
+
+			//currentSettings.username,currentSettings.password
+			//stompClient.connect(currentSettings.username,currentSettings.password, onConnect, onError, currentSettings.virtualHost);
+			stompClient.connect(headers, onConnect, onError);
 		}
 
 
