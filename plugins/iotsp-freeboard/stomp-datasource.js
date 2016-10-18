@@ -124,13 +124,9 @@
 		 */
 		var onDataReceived = function(stompFrame){
 
-			var objdata, data, headers, headersData;
-
-			console.info('stompFrame=' + JSON.stringify(stompFrame));
+			var objdata, data, headers;
 
 			if (stompFrame.body) {
-
-				console.info("got message with body " + stompFrame.body);
 
 				headers = stompFrame.headers;
 				data = stompFrame.body;
@@ -145,88 +141,83 @@
 				}
 
 				var userFilters = currentSettings.headers;
-				var match = 0;
-				for(var i=0; i < userFilters.length; i++){
-					for (var p in headersMap){
-						if(userFilters[i].key == p && userFilters[i].value == headersMap[p]){
-							match++;
+
+				if(userFilters && userFilters.length > 0) {
+					var match = 0;
+
+					for (var i = 0; i < userFilters.length; i++) {
+						for (var p in headersMap) {
+							if (userFilters[ i ].key == p && userFilters[ i ].value == headersMap[ p ]) {
+								match++;
+							}
+						}
+					}
+
+					if (currentSettings.match == "all") {
+						if (userFilters.length == match) {
+							try {
+								console.info ('stompFrame=' + JSON.stringify (stompFrame));
+								objdata = JSON.parse (data);
+							}
+							catch (e) {
+								objdata = {
+									"Invalid Data Received": "We cannot parse this, please check your data format."
+								};
+								console.debug ('Invalid JSON Received');
+							}
+
+							if (typeof objdata == "object") {
+								updateCallback (objdata);
+							} else {
+								updateCallback (data);
+							}
+						}
+					}
+
+					if (currentSettings.match == "any") {
+						if (match > 0) {
+							try {
+								console.info ('stompFrame=' + JSON.stringify (stompFrame));
+								objdata = JSON.parse (data);
+							}
+							catch (e) {
+								objdata = {
+									"Invalid Data Received": "We cannot parse this, please check your data format."
+								};
+								console.debug ('Invalid JSON Received');
+							}
+
+							if (typeof objdata == "object") {
+								updateCallback (objdata);
+							} else {
+								updateCallback (data);
+							}
 						}
 					}
 				}
+				else{
+					console.info ('stompFrame=' + JSON.stringify (stompFrame));
+					try {
+						objdata = JSON.parse (data);
+					}
+					catch (e) {
+						objdata = {
+							"Invalid Data Received": "We cannot parse this, please check your data format."
+						};
+						console.debug ('Invalid JSON Received');
+ 					}
 
-				if(currentSettings.match == "all"){
-					if(userFilters.length == match){
-						try {
-							objdata = JSON.parse(data);
-						} catch (e) {
-							console.debug('Invalid JSON Received');
-						}
-
-						if (typeof objdata == "object") {
-							updateCallback(objdata);
-						} else {
-							updateCallback(data);
-						}
+					if (typeof objdata == "object") {
+						updateCallback (objdata);
+					} else {
+						updateCallback (data);
 					}
 				}
-				else if(currentSettings.match == "any"){
-					if(match > 0){
-						try {
-							objdata = JSON.parse(data);
-						} catch (e) {
-							console.debug('Invalid JSON Received');
-						}
-
-						if (typeof objdata == "object") {
-							updateCallback(objdata);
-						} else {
-							updateCallback(data);
-						}
-					}
-				}
-
-				//console.log('match total =' + match);
-
-
-				//console.log('headers from user = ' + JSON.stringify(currentSettings.headers[0]));
-
-//				try{
-//					headersData =  JSON.parse(headersData);
-//
-//					console.log("deviceId = " + headersData.deviceID);
-//				}
-//				catch(e){
-//					console.debug('Invalid JSON Received');
-//				}
-
-
-
-
-			} else {
+			}
+			else {
 				console.info('An Empty Message Received');
 			}
 
-		};
-
-		function parse_headers(headers_str) {
-			var these_headers = {},
-				one_header = [],
-				header_key = null,
-				header_val = null,
-				headers_split = headers_str.split('\n');
-
-			for (var i = 0; i < headers_split.length; i++) {
-				one_header = headers_split[i].split(':');
-				if (one_header.length > 1) {
-					header_key = one_header.shift();
-					header_val = one_header.join(':');
-					these_headers[header_key] = header_val;
-				}
-				else {
-					these_headers[one_header[0]] = one_header[1];
-				}
-			}
-			return these_headers;
 		};
 
 		/**
