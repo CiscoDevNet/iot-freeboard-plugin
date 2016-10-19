@@ -11,7 +11,7 @@
 
 		display_name : "Cisco AMQP Data Broker",
 
-		description : "A plugin to connect to the Cisco IoT Platform",
+		description : "A plugin to connect to the Cisco IoT Data Connect Platform",
 
 		external_scripts : [
 			"plugins/iotsp-freeboard/stomp.js"	// required script for STOMP protocol
@@ -34,7 +34,7 @@
 			},
 			{
 				name        : "match",
-				display_name: "Exchange Matches",
+				display_name: "Filter Match",
 				type        : "option",
 				options			: [
 					{
@@ -46,25 +46,25 @@
 						value: "any"
 					}
 				],
-				description : 'Match.'
+				description : 'Match All Filters or Match Any Filters?'
 			},
 			{
-				name : 'headers',
-				displayName : 'Headers',
+				name : 'filters',
+				displayName : "Filters",
 				type : 'array',
 				settings    : [
 					{
 						name        : "key",
-						display_name: "Key",
+						display_name: "Filter Name",
 						type        : "text"
 					},
 					{
 						name        : "value",
-						display_name: "Value",
+						display_name: "Filter Value",
 						type        : "text"
 					}
 				],
-				description : 'The headers exchange filter.'
+				description : 'Filters for messages coming into your exchange.'
 			},
 			{
 				name : 'routingKey',
@@ -85,14 +85,14 @@
 				display_name : 'Username',
 				type : 'text',
 				default_value: "guest",
-				description : 'Cisco IoT username.'
+				description : 'Cisco IoT Data Connect username.'
 			},
 			{
 				name : 'password',
 				display_name : 'password',
 				type : 'text',
 				default_value: "guest",
-				description : 'Cisco IoT password'
+				description : 'Cisco IoT Data Connect password'
 			}],
 
 		newInstance : function(settings, newInstanceCallback, updateCallback){
@@ -140,7 +140,7 @@
 					}
 				}
 
-				var userFilters = currentSettings.headers;
+				var userFilters = currentSettings.filters;
 
 				if(userFilters && userFilters.length > 0) {
 					var match = 0;
@@ -226,11 +226,9 @@
 		var onConnect = function() {
 			console.info("Stomp connection(%s) Opened", currentSettings.url);
 
-			var headers = {'selector': "deviceId = 000"};
-
 			if(currentSettings.exchange != ""){
 				//subscribe through an exchange
-				stompClient.subscribe("/exchange/" + currentSettings.exchange + "/" + currentSettings.routingKey , onDataReceived, headers);
+				stompClient.subscribe("/exchange/" + currentSettings.exchange + "/" + currentSettings.routingKey , onDataReceived);
 			}
 		};
 
@@ -273,7 +271,6 @@
 				"host": currentSettings.virtualHost
 			};
 
-			//currentSettings.username,currentSettings.password
 			//stompClient.connect(currentSettings.username,currentSettings.password, onConnect, onError, currentSettings.virtualHost);
 			stompClient.connect(headers, onConnect, onError);
 		}
@@ -286,6 +283,12 @@
 		self.onSettingsChanged = function(newSettings) {
 			currentSettings = newSettings;
 
+			//When settings changed, disconnect existing connection and recreate a new one.
+			stompClient.disconnect(function(){
+
+				console.log('stomp disconnected');
+
+			});
 			createConnection();
 		};
 
