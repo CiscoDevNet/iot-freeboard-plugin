@@ -90,8 +90,8 @@
 			{
 				name : 'password',
 				display_name : 'password',
-				type : 'text',
-				default_value: "guest",
+				type : 'password',  //changed to password type instead of text
+ 				default_value: "guest",
 				description : 'Cisco IoT Data Connect password'
 			}],
 
