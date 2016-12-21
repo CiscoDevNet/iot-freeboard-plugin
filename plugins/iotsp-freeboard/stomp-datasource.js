@@ -256,10 +256,11 @@
 			parser.host;     // => "10.10.4.5:15674"
 
 			if(parser.port == ""){
-				parser.port = 15674;  //default rabbitmq webstomp port
+				//parser.port = 15674;  //default rabbitmq webstomp port
+				parser.port = 8883;
 			}
 
-			var url = "ws://" + parser.hostname + ":" + parser.port + "/ws";
+			var url = "wss://" + parser.hostname + ":" + parser.port + "/ws";
 
 			//For Chrome, make sure protocol param is set as an empty array
 			stompClient = Stomp.client(url, []);
