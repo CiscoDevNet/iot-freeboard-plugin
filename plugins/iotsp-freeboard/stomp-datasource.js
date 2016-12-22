@@ -257,7 +257,7 @@
 
 			if(parser.port == ""){
 				//parser.port = 15674;  //default rabbitmq webstomp port
-				parser.port = 8883;
+				parser.port = 15673; //default rabbitmq webstomp port for TLS
 			}
 
 			var url = "wss://" + parser.hostname + ":" + parser.port + "/ws";
