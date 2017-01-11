@@ -22,14 +22,14 @@
 				name : 'server',
 				displayName : 'Server',
 				type : 'text',
-				default_value: "localhost:15674",
+				default_value: "localhost:15673",
 				description :"The server where your AMQP broker is running."
 			},
 			{
 				name : 'exchange',
 				displayName : 'Exchange Name',
 				type : 'text',
-				default_value: "test-headers",
+				default_value: "TEST-EXC",
 				description : 'The exchange you are subscribing to'
 			},
 			{
@@ -102,7 +102,6 @@
 		}
 
 	});
-
 
 
 	/**
