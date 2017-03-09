@@ -1588,6 +1588,20 @@ PluginEditor = function(jsEditor, valueEditor)
 
 						break;
 					}
+					case "password":
+					{
+						var input = $('<input type="password">').appendTo(valueCell).change(function()
+						{
+							newSettings.settings[settingDef.name] = $(this).val();
+						});
+
+						if(settingDef.name in currentSettingsValues)
+						{
+							input.val(currentSettingsValues[settingDef.name]);
+						}
+
+						break;
+					}
 					default:
 					{
 						newSettings.settings[settingDef.name] = currentSettingsValues[settingDef.name];

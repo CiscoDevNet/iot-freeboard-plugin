@@ -1,0 +1,7 @@
+.DS_Store
+node_modules/
+# IntelliJ project files
+*.iml
+out
+gen
+.idea/
