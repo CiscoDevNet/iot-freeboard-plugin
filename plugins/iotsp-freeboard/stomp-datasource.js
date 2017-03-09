@@ -22,7 +22,7 @@
 				name : 'server',
 				displayName : 'Server',
 				type : 'text',
-				default_value: "localhost:15673",
+				default_value: "localhost",
 				description :"The server where your AMQP broker is running."
 			},
 			{
@@ -77,7 +77,7 @@
 				name : 'virtualHost',
 				displayName : 'Virtual Host',
 				type : 'text',
-				default_value: "/",
+				default_value: "IOTSP_INTERNAL",
 				description : 'The virtual host for the AMQP broker.'
 			},
 			{
@@ -91,7 +91,7 @@
 				name : 'password',
 				display_name : 'password',
 				type : 'password',  //changed to password type instead of text
- 				default_value: "guest",
+ 				default_value: "",
 				description : 'Cisco IoT Data Connect password'
 			}],
 
