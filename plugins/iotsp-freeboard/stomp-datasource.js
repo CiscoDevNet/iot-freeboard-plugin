@@ -22,14 +22,14 @@
 				name : 'server',
 				displayName : 'Server',
 				type : 'text',
-				default_value: "localhost:15674",
+				default_value: "localhost:15673",
 				description :"The server where your AMQP broker is running."
 			},
 			{
 				name : 'exchange',
 				displayName : 'Exchange Name',
 				type : 'text',
-				default_value: "test-headers",
+				default_value: "TEST-EXC",
 				description : 'The exchange you are subscribing to'
 			},
 			{
@@ -102,7 +102,6 @@
 		}
 
 	});
-
 
 
 	/**
@@ -256,10 +255,11 @@
 			parser.host;     // => "10.10.4.5:15674"
 
 			if(parser.port == ""){
-				parser.port = 15674;  //default rabbitmq webstomp port
+				//parser.port = 15674;  //default rabbitmq webstomp port
+				parser.port = 15673; //default rabbitmq webstomp port for TLS
 			}
 
-			var url = "ws://" + parser.hostname + ":" + parser.port + "/ws";
+			var url = "wss://" + parser.hostname + ":" + parser.port + "/ws";
 
 			//For Chrome, make sure protocol param is set as an empty array
 			stompClient = Stomp.client(url, []);

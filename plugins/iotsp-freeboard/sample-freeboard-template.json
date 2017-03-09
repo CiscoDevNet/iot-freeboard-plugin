@@ -1,0 +1,161 @@
+{
+	"version": 1,
+	"allow_edit": true,
+	"plugins": [],
+	"panes": [
+		{
+			"title": "Gyroscope",
+			"width": 1,
+			"row": {
+				"3": 1
+			},
+			"col": {
+				"3": 1
+			},
+			"col_width": 1,
+			"widgets": [
+				{
+					"type": "sparkline",
+					"settings": {
+						"title": "yaw",
+						"value": [
+							"datasources[\"Gyroscope\"][\"data\"][\"gyroscope\"][\"yaw\"]"
+						]
+					}
+				},
+				{
+					"type": "sparkline",
+					"settings": {
+						"title": "pitch",
+						"value": [
+							"datasources[\"Gyroscope\"][\"data\"][\"gyroscope\"][\"pitch\"]"
+						]
+					}
+				},
+				{
+					"type": "sparkline",
+					"settings": {
+						"title": "roll",
+						"value": [
+							"datasources[\"Gyroscope\"][\"data\"][\"gyroscope\"][\"roll\"]"
+						]
+					}
+				}
+			]
+		},
+		{
+			"width": 1,
+			"row": {
+				"3": 1
+			},
+			"col": {
+				"3": 2
+			},
+			"col_width": 1,
+			"widgets": [
+				{
+					"type": "gauge",
+					"settings": {
+						"title": "temperature",
+						"value": "datasources[\"Temperature\"][\"data\"][\"temperature\"]",
+						"min_value": 0,
+						"max_value": 100
+					}
+				}
+			]
+		},
+		{
+			"width": 1,
+			"row": {
+				"3": 1
+			},
+			"col": {
+				"3": 3
+			},
+			"col_width": 1,
+			"widgets": [
+				{
+					"type": "gauge",
+					"settings": {
+						"title": "humidity",
+						"value": "datasources[\"Humidity\"][\"data\"][\"humidity\"]",
+						"min_value": 0,
+						"max_value": 100
+					}
+				}
+			]
+		}
+	],
+	"datasources": [
+		{
+			"name": "Temperature",
+			"type": "Cisco-freeboard-plugin",
+			"settings": {
+				"server": "iotdc-tme.iotspdev.io",
+				"exchange": "your-EXC",
+				"match": "all",
+				"filters": [
+					{
+						"key": "tag",
+						"value": "temperature"
+					},
+					{
+						"key": "gatewayId",
+						"value": "your_gw_id"
+					}
+				],
+				"routingKey": "dev2app",
+				"virtualHost": "IOTSP_INTERNAL",
+				"username": "your_userid@cisco.com",
+				"password": "your_password"
+			}
+		},
+		{
+			"name": "Humidity",
+			"type": "Cisco-freeboard-plugin",
+			"settings": {
+				"server": "iotdc-tme.iotspdev.io",
+				"exchange": "your-EXC",
+				"match": "all",
+				"filters": [
+					{
+						"key": "tag",
+						"value": "humidity"
+					},
+					{
+						"key": "gatewayId",
+						"value": "your_gw_id"
+					}
+				],
+				"routingKey": "dev2app",
+				"virtualHost": "IOTSP_INTERNAL",
+				"username": "your_userid@cisco.com",
+				"password": "your_password"
+			}
+		},
+		{
+			"name": "Gyroscope",
+			"type": "Cisco-freeboard-plugin",
+			"settings": {
+				"server": "iotdc-tme.iotspdev.io",
+				"exchange": "your-EXC",
+				"match": "all",
+				"filters": [
+					{
+						"key": "tag",
+						"value": "gyroscope"
+					},
+					{
+						"key": "gatewayId",
+						"value": "your_gw_id"
+					}
+				],
+				"routingKey": "dev2app",
+				"virtualHost": "IOTSP_INTERNAL",
+				"username": "your_userid@cisco.com",
+				"password": "your_password"
+			}
+		}
+	],
+	"columns": 3
+}
