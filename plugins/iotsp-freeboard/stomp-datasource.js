@@ -281,6 +281,8 @@
 		 * @param newSettings
 		 */
 		self.onSettingsChanged = function(newSettings) {
+			//password field is masked so need to make sure the settingsChanged picks up the password field
+			newSettings.password = currentSettings.password
 			currentSettings = newSettings;
 
 			//When settings changed, disconnect existing connection and recreate a new one.
